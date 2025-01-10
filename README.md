@@ -10,4 +10,4 @@ Voici un bloc de code Python utilisant `numpy`:
 <!-- Enlever les barres obliques -->
 ```python
 import numpy as np
-```
+```"# demo-tp1" 
