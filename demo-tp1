@@ -27,9 +27,65 @@ y_true = linear_model(p_true, x)
 yerr = noise_level * np.ones_like(x)  # `ones_like` crée un tableau rempli de 1, mais avec la même taille que x
 y = y_true + yerr * rng.standard_normal(N)
 
-plt.plot(x, y_true, label="True signal")
+
+def chi2_fun(
+    p: np.ndarray[float],
+    x: np.ndarray[float],
+    y: np.ndarray[float],
+    yerr: np.ndarray[float],
+) -> float:
+    """Chi2 pour un modèle linéaire
+
+    :param p: Paramètres du modèle, m et b
+    :param x: Valeurs X des données
+    :param y: Valeurs Y des données
+    :param yerr: Incertitude en Y sur les données
+    :return: $\chi^2$ pour l'ensemble des données
+    """
+    y_mod = linear_model(p, x)
+    return np.sum((y - y_mod)**2 / yerr**2)
+
+p_guess = np.array([5, 6])
+
+opt_res = minimize(chi2_fun, p_guess, args=(x, y, yerr))
+
+
+
+plt.plot(x, linear_model(p_guess, x), label="Initial guess")
 plt.errorbar(x, y, yerr=yerr, fmt="k.", label="Data")
 plt.xlabel("X")
 plt.ylabel("Y")
 plt.legend()
 plt.show()
+
+p_fit = opt_res.x
+best_mod = linear_model(p_fit, x)
+res = y - best_mod
+
+fig, axes = plt.subplots(
+    2, 1,
+    figsize=(8, 8),
+    sharex=True,  # utiliser le même axe des X pour le modèle et les résidus
+    gridspec_kw={"height_ratios": (2, 1)}  # Panneau 2x plus haut pour le modèle qu pour les résidus
+)
+axes[0].plot(x, linear_model(p_guess, x), label="Initial guess")
+axes[0].plot(x, best_mod, label="$\chi^2$ Best Fit")
+axes[0].errorbar(x, y, yerr=yerr, fmt="k.", label="Data")
+axes[0].set_ylabel("Y")
+axes[0].legend()
+
+axes[1].errorbar(x, res, yerr=yerr, fmt="k.")
+axes[1].set_ylabel("Residuals")
+
+axes[-1].set_xlabel("X")
+plt.show()
+
+# N'hésitez pas à augmenter N pour avoir un histogramme plus clair
+plt.hist(res)
+plt.xlabel("Residuals")
+plt.ylabel("Counts")
+plt.show()
+
+# Save the output
+np.savetxt("top_secret_data.txt", np.vstack([x, y, yerr]).T)
+np.savetxt("top_secret_model.txt", best_mod)
