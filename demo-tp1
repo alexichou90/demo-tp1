@@ -1,0 +1,35 @@
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy.optimize import minimize
+
+# "Nouvelle" interface pour les nombres aléatoires avec Numpy
+rng = np.random.default_rng(seed=3051)
+
+def linear_model(p: np.ndarray[float], x: np.ndarray[float]) -> np.ndarray[float]:
+    """Modèle linéaire y = m * x + b
+
+    :param p: Tableau contenant les paramètres m et b, dans ce ordre
+    :param x: Tableau de valeurs x
+    :return: Valeurs y pour le modèle de droite
+    """
+    m, b = p
+    return m * x + b
+
+N = 100  # Nombre de points
+m_true, b_true = 6, 2
+p_true = np.array([m_true, b_true])
+noise_level = 2  # Écrat-type du bruit gaussien
+
+x = np.sort(rng.uniform(0, 10, size=N))
+y_true = linear_model(p_true, x)
+
+# Bruit gaussien indépendant avec barres d'erreur uniformes
+yerr = noise_level * np.ones_like(x)  # `ones_like` crée un tableau rempli de 1, mais avec la même taille que x
+y = y_true + yerr * rng.standard_normal(N)
+
+plt.plot(x, y_true, label="True signal")
+plt.errorbar(x, y, yerr=yerr, fmt="k.", label="Data")
+plt.xlabel("X")
+plt.ylabel("Y")
+plt.legend()
+plt.show()
