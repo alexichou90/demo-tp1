@@ -11,3 +11,4 @@ Voici un bloc de code Python utilisant `numpy`:
 ```python
 import numpy as np
 ```"# demo-tp1" 
+"# demo-tp1" 
